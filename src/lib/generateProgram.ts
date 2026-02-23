@@ -77,7 +77,7 @@ Return ONLY valid JSON (no markdown, no explanation) matching this exact schema:
 }`
 
   const response = await groq.chat.completions.create({
-    model: 'llama3-70b-8192',
+    model: 'llama-3.3-70b-versatile',
     messages: [{ role: 'user', content: prompt }],
     temperature: 0.3,
     max_tokens: 4096,
