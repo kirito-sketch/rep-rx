@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from './store/authStore'
 import { AuthPage } from './pages/AuthPage'
@@ -6,7 +7,20 @@ import { OnboardingFlow } from './pages/OnboardingFlow'
 import { SessionPage } from './pages/SessionPage'
 
 export default function App() {
-  const { authed } = useAuthStore()
+  const { authed, loading, restoreSession } = useAuthStore()
+
+  useEffect(() => {
+    restoreSession()
+  }, [])
+
+  // Show spinner while we check existing session
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-bg-base flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-bg-elevated border-t-accent rounded-full animate-spin" />
+      </div>
+    )
+  }
 
   return (
     <BrowserRouter>

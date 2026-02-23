@@ -15,13 +15,13 @@ export function AuthPage() {
     inputRef.current?.focus()
   }, [])
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/\D/g, '').slice(0, PIN_LENGTH)
     setPin(value)
     setError(false)
 
     if (value.length === PIN_LENGTH) {
-      const ok = unlock(value)
+      const ok = await unlock(value)
       if (!ok) {
         setError(true)
         setTimeout(() => {
