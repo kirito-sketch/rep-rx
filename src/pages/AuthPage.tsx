@@ -1,60 +1,107 @@
 import { useState } from 'react'
-import { supabase } from '../lib/supabase'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useAuthStore } from '../store/authStore'
+
+const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', '⌫']
+const PIN_LENGTH = 6
 
 export function AuthPage() {
-  const [email, setEmail] = useState('')
-  const [sent, setSent] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const { unlock } = useAuthStore()
+  const [pin, setPin] = useState('')
+  const [error, setError] = useState(false)
 
-  const handleMagicLink = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    await supabase.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: window.location.origin },
-    })
-    setSent(true)
-    setLoading(false)
+  const handleKey = (key: string) => {
+    if (key === '⌫') {
+      setPin((p) => p.slice(0, -1))
+      setError(false)
+      return
+    }
+    if (key === '' || pin.length >= PIN_LENGTH) return
+
+    const next = pin + key
+
+    if (next.length === PIN_LENGTH) {
+      const ok = unlock(next)
+      if (!ok) {
+        setError(true)
+        setTimeout(() => {
+          setPin('')
+          setError(false)
+        }, 600)
+      }
+      // if ok, App.tsx redirects automatically via authed state
+    } else {
+      setPin(next)
+    }
   }
 
   return (
-    <div className="min-h-screen bg-bg-base flex flex-col items-center justify-center px-6">
+    <div className="min-h-screen bg-bg-base flex flex-col items-center justify-center px-6 select-none">
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        className="w-full max-w-sm"
+        className="w-full max-w-xs flex flex-col items-center gap-10"
       >
-        <h1 className="text-2xl font-bold text-text-primary mb-1">Rep Rx</h1>
-        <p className="text-text-muted text-sm mb-8">Built for you. Not for everyone.</p>
+        {/* Wordmark */}
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-text-primary">Rep Rx</h1>
+          <p className="text-text-muted text-xs mt-1">Enter your PIN</p>
+        </div>
 
-        {sent ? (
-          <div className="border border-border rounded-md p-4">
-            <p className="text-text-secondary text-sm">
-              Check your email — magic link sent to{' '}
-              <span className="text-text-primary">{email}</span>
-            </p>
-          </div>
-        ) : (
-          <form onSubmit={handleMagicLink} className="flex flex-col gap-3">
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="your@email.com"
-              required
-              className="w-full bg-bg-surface border border-border rounded-md px-4 py-3 text-text-primary placeholder:text-text-muted text-sm focus:outline-none focus:border-accent transition-colors"
+        {/* PIN dots */}
+        <motion.div
+          animate={error ? { x: [-8, 8, -6, 6, -4, 0] } : { x: 0 }}
+          transition={{ duration: 0.4 }}
+          className="flex gap-4"
+        >
+          {Array.from({ length: PIN_LENGTH }).map((_, i) => (
+            <div
+              key={i}
+              className={`w-3 h-3 rounded-full border transition-all duration-150 ${
+                i < pin.length
+                  ? error
+                    ? 'bg-red-500 border-red-500'
+                    : 'bg-accent border-accent'
+                  : 'bg-transparent border-border'
+              }`}
             />
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-accent text-white font-semibold rounded-md py-3 text-sm disabled:opacity-50 transition-opacity"
+          ))}
+        </motion.div>
+
+        {/* Error */}
+        <AnimatePresence>
+          {error && (
+            <motion.p
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="text-red-400 text-xs -mt-6"
             >
-              {loading ? 'Sending...' : 'Continue with Email →'}
+              Incorrect PIN
+            </motion.p>
+          )}
+        </AnimatePresence>
+
+        {/* Numpad */}
+        <div className="grid grid-cols-3 gap-3 w-full">
+          {KEYS.map((key, i) => (
+            <button
+              key={i}
+              onClick={() => handleKey(key)}
+              disabled={key === ''}
+              className={`h-16 rounded-md text-xl font-medium transition-all active:scale-95 ${
+                key === ''
+                  ? 'invisible pointer-events-none'
+                  : key === '⌫'
+                  ? 'bg-bg-elevated border border-border text-text-secondary text-base'
+                  : 'bg-bg-surface border border-border text-text-primary hover:border-accent'
+              }`}
+            >
+              {key}
             </button>
-          </form>
-        )}
+          ))}
+        </div>
       </motion.div>
     </div>
   )

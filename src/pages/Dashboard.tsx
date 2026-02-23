@@ -7,61 +7,63 @@ import { useAuthStore } from '../store/authStore'
 import { InstallPrompt } from '../components/InstallPrompt'
 
 export function Dashboard() {
-  const { user, signOut } = useAuthStore()
+  const { signOut } = useAuthStore()
   const navigate = useNavigate()
   const [todayTemplate, setTodayTemplate] = useState<any>(null)
   const [loading, setLoading] = useState(true)
-  // displayName state removed (unused in render)
 
   useEffect(() => {
-    if (!user) return
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) {
+        // No Supabase session — go to onboarding to create one
+        navigate('/onboarding')
+        return
+      }
 
-    // Check onboarding status
-    supabase
-      .from('profiles')
-      .select('onboarded, display_name, goal')
-      .eq('id', user.id)
-      .single()
-      .then(({ data }) => {
-        if (!data?.onboarded) {
-          navigate('/onboarding')
-          return
-        }
-      })
+      // Check onboarding status
+      supabase
+        .from('profiles')
+        .select('onboarded')
+        .eq('id', user.id)
+        .single()
+        .then(({ data }) => {
+          if (!data?.onboarded) navigate('/onboarding')
+        })
 
-    // Detect today's workout (1=Mon … 7=Sun)
-    const todayJs = new Date().getDay()
-    const today = todayJs === 0 ? 7 : todayJs
+      // Detect today's workout (1=Mon … 7=Sun)
+      const todayJs = new Date().getDay()
+      const today = todayJs === 0 ? 7 : todayJs
 
-    supabase
-      .from('workout_templates')
-      .select(`
-        id,
-        label,
-        day_of_week,
-        programs!inner(user_id, active),
-        template_exercises(
+      supabase
+        .from('workout_templates')
+        .select(`
           id,
-          exercise_id,
-          target_sets,
-          target_reps_min,
-          target_reps_max,
-          target_weight,
-          rest_seconds,
-          order_index,
-          exercises(name, muscle_group_primary, gif_url)
-        )
-      `)
-      .eq('day_of_week', today)
-      .eq('programs.user_id', user.id)
-      .eq('programs.active', true)
-      .order('order_index', { referencedTable: 'template_exercises' })
-      .maybeSingle()
-      .then(({ data }) => {
-        setTodayTemplate(data)
-        setLoading(false)
-      })
-  }, [user])
+          label,
+          day_of_week,
+          programs!inner(user_id, active),
+          template_exercises(
+            id,
+            exercise_id,
+            target_sets,
+            target_reps_min,
+            target_reps_max,
+            target_weight,
+            rest_seconds,
+            order_index,
+            exercises(name, muscle_group_primary, gif_url)
+          )
+        `)
+        .eq('day_of_week', today)
+        .eq('programs.user_id', user.id)
+        .eq('programs.active', true)
+        .order('order_index', { referencedTable: 'template_exercises' })
+        .maybeSingle()
+        .then(({ data }) => {
+          setTodayTemplate(data)
+          setLoading(false)
+        })
+    })
+  }, [])
 
   return (
     <div className="min-h-screen bg-bg-base">
@@ -80,7 +82,7 @@ export function Dashboard() {
           onClick={signOut}
           className="text-text-muted text-xs border border-border rounded-md px-3 py-2"
         >
-          Sign out
+          Lock
         </button>
       </header>
 

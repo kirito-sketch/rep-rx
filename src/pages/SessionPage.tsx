@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { supabase } from '../lib/supabase'
-import { useAuthStore } from '../store/authStore'
 import { useSessionStore } from '../store/sessionStore'
 import { ExerciseMediaCard } from '../components/session/ExerciseMediaCard'
 import { SetLogger } from '../components/session/SetLogger'
@@ -11,7 +10,6 @@ import { SessionWrap } from '../components/session/SessionWrap'
 
 export function SessionPage() {
   const { templateId } = useParams<{ templateId: string }>()
-  const { user } = useAuthStore()
   const navigate = useNavigate()
   const {
     currentExerciseIndex,
@@ -29,7 +27,7 @@ export function SessionPage() {
   const sessionCreated = useRef(false)
 
   useEffect(() => {
-    if (!templateId || !user) return
+    if (!templateId) return
     resetSession()
 
     // Load template
@@ -52,19 +50,22 @@ export function SessionPage() {
     if (!sessionCreated.current) {
       sessionCreated.current = true
       startedAt.current = new Date()
-      supabase
-        .from('workout_sessions')
-        .insert({ user_id: user.id, template_id: templateId })
-        .select()
-        .single()
-        .then(({ data }) => {
-          if (data) {
-            _setSessionId(data.id)
-            setSessionId(data.id)
-          }
-        })
+      supabase.auth.getUser().then(({ data: { user } }) => {
+        if (!user) return
+        supabase
+          .from('workout_sessions')
+          .insert({ user_id: user.id, template_id: templateId })
+          .select()
+          .single()
+          .then(({ data }) => {
+            if (data) {
+              _setSessionId(data.id)
+              setSessionId(data.id)
+            }
+          })
+      })
     }
-  }, [templateId, user])
+  }, [templateId])
 
   const exercises = (template?.template_exercises ?? []).sort(
     (a: any, b: any) => a.order_index - b.order_index

@@ -1,20 +1,28 @@
 import { create } from 'zustand'
-import { supabase } from '../lib/supabase'
-import type { User } from '@supabase/supabase-js'
+
+const SESSION_KEY = 'rep_rx_authed'
 
 interface AuthState {
-  user: User | null
+  authed: boolean
   loading: boolean
-  setUser: (user: User | null) => void
-  signOut: () => Promise<void>
+  unlock: (pin: string) => boolean
+  signOut: () => void
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  loading: true,
-  setUser: (user) => set({ user, loading: false }),
-  signOut: async () => {
-    await supabase.auth.signOut()
-    set({ user: null })
+export const useAuthStore = create<AuthState>(() => ({
+  authed: localStorage.getItem(SESSION_KEY) === '1',
+  loading: false,
+  unlock: (pin: string) => {
+    const correct = import.meta.env.VITE_APP_PIN
+    if (pin === correct) {
+      localStorage.setItem(SESSION_KEY, '1')
+      useAuthStore.setState({ authed: true })
+      return true
+    }
+    return false
+  },
+  signOut: () => {
+    localStorage.removeItem(SESSION_KEY)
+    useAuthStore.setState({ authed: false })
   },
 }))
