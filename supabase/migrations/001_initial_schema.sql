@@ -1,5 +1,5 @@
 -- Profiles
-CREATE TABLE profiles (
+CREATE TABLE IF NOT EXISTS profiles (
   id            uuid PRIMARY KEY REFERENCES auth.users ON DELETE CASCADE,
   display_name  text,
   goal          text CHECK (goal IN ('strength','muscle','fat_loss','general')),
@@ -11,7 +11,7 @@ CREATE TABLE profiles (
 );
 
 -- Injuries
-CREATE TABLE injuries (
+CREATE TABLE IF NOT EXISTS injuries (
   id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id         uuid REFERENCES profiles(id) ON DELETE CASCADE,
   body_part       text NOT NULL,
@@ -22,7 +22,7 @@ CREATE TABLE injuries (
 );
 
 -- Exercise library (populated from ExerciseDB cache)
-CREATE TABLE exercises (
+CREATE TABLE IF NOT EXISTS exercises (
   id                       text PRIMARY KEY,
   name                     text NOT NULL,
   muscle_group_primary     text,
@@ -35,18 +35,18 @@ CREATE TABLE exercises (
 );
 
 -- Programs
-CREATE TABLE programs (
+CREATE TABLE IF NOT EXISTS programs (
   id           uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id      uuid REFERENCES profiles(id) ON DELETE CASCADE,
   name         text,
   week_count   int DEFAULT 4,
   active       boolean DEFAULT true,
-  generated_by text DEFAULT 'groq-llama3-70b',
+  generated_by text DEFAULT 'groq-llama3',
   created_at   timestamptz DEFAULT now()
 );
 
 -- Workout templates (days within a program)
-CREATE TABLE workout_templates (
+CREATE TABLE IF NOT EXISTS workout_templates (
   id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   program_id  uuid REFERENCES programs(id) ON DELETE CASCADE,
   day_of_week int CHECK (day_of_week BETWEEN 1 AND 7),
@@ -55,7 +55,7 @@ CREATE TABLE workout_templates (
 );
 
 -- Exercises within a template
-CREATE TABLE template_exercises (
+CREATE TABLE IF NOT EXISTS template_exercises (
   id                    uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   template_id           uuid REFERENCES workout_templates(id) ON DELETE CASCADE,
   exercise_id           text REFERENCES exercises(id),
@@ -69,7 +69,7 @@ CREATE TABLE template_exercises (
 );
 
 -- Workout sessions (actual logged workouts)
-CREATE TABLE workout_sessions (
+CREATE TABLE IF NOT EXISTS workout_sessions (
   id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id         uuid REFERENCES profiles(id) ON DELETE CASCADE,
   template_id     uuid REFERENCES workout_templates(id),
@@ -81,7 +81,7 @@ CREATE TABLE workout_sessions (
 );
 
 -- Individual set logs
-CREATE TABLE set_logs (
+CREATE TABLE IF NOT EXISTS set_logs (
   id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   session_id  uuid REFERENCES workout_sessions(id) ON DELETE CASCADE,
   exercise_id text REFERENCES exercises(id),
@@ -92,24 +92,26 @@ CREATE TABLE set_logs (
   logged_at   timestamptz DEFAULT now()
 );
 
--- Row Level Security
-ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE injuries ENABLE ROW LEVEL SECURITY;
-ALTER TABLE programs ENABLE ROW LEVEL SECURITY;
+-- ─── Row Level Security ───────────────────────────────────────────────────────
+ALTER TABLE profiles          ENABLE ROW LEVEL SECURITY;
+ALTER TABLE injuries          ENABLE ROW LEVEL SECURITY;
+ALTER TABLE programs          ENABLE ROW LEVEL SECURITY;
 ALTER TABLE workout_templates ENABLE ROW LEVEL SECURITY;
 ALTER TABLE template_exercises ENABLE ROW LEVEL SECURITY;
-ALTER TABLE workout_sessions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE set_logs ENABLE ROW LEVEL SECURITY;
-ALTER TABLE exercises ENABLE ROW LEVEL SECURITY;
+ALTER TABLE workout_sessions  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE set_logs          ENABLE ROW LEVEL SECURITY;
+ALTER TABLE exercises         ENABLE ROW LEVEL SECURITY;
 
--- Policies
-CREATE POLICY "own profile" ON profiles FOR ALL USING (auth.uid() = id);
-CREATE POLICY "own injuries" ON injuries FOR ALL USING (auth.uid() = user_id);
-CREATE POLICY "own programs" ON programs FOR ALL USING (auth.uid() = user_id);
-CREATE POLICY "own sessions" ON workout_sessions FOR ALL USING (auth.uid() = user_id);
-CREATE POLICY "own set logs" ON set_logs FOR ALL USING (
+-- ─── Policies ─────────────────────────────────────────────────────────────────
+CREATE POLICY "own profile"    ON profiles    FOR ALL USING (auth.uid() = id);
+CREATE POLICY "own injuries"   ON injuries    FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "own programs"   ON programs    FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "own sessions"   ON workout_sessions FOR ALL USING (auth.uid() = user_id);
+
+CREATE POLICY "own set logs"   ON set_logs    FOR ALL USING (
   session_id IN (SELECT id FROM workout_sessions WHERE user_id = auth.uid())
 );
+
 CREATE POLICY "own template exercises" ON template_exercises FOR ALL USING (
   template_id IN (
     SELECT wt.id FROM workout_templates wt
@@ -117,12 +119,17 @@ CREATE POLICY "own template exercises" ON template_exercises FOR ALL USING (
     WHERE p.user_id = auth.uid()
   )
 );
+
 CREATE POLICY "own workout templates" ON workout_templates FOR ALL USING (
   program_id IN (SELECT id FROM programs WHERE user_id = auth.uid())
 );
-CREATE POLICY "public exercises read" ON exercises FOR SELECT USING (true);
 
--- PR detection trigger
+-- Exercises: anyone authenticated can read; any authenticated user can upsert (cache)
+CREATE POLICY "public exercises read"   ON exercises FOR SELECT USING (auth.role() = 'authenticated');
+CREATE POLICY "authenticated exercises write" ON exercises FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+CREATE POLICY "authenticated exercises upsert" ON exercises FOR UPDATE USING (auth.role() = 'authenticated');
+
+-- ─── PR detection trigger ─────────────────────────────────────────────────────
 CREATE OR REPLACE FUNCTION check_pr()
 RETURNS TRIGGER AS $$
 DECLARE
@@ -142,6 +149,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER set_pr_flag
+CREATE OR REPLACE TRIGGER set_pr_flag
 BEFORE INSERT ON set_logs
 FOR EACH ROW EXECUTE FUNCTION check_pr();
