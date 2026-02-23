@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import { TodayCard } from '../components/TodayCard'
 import { WeekStrip } from '../components/WeekStrip'
 import { useAuthStore } from '../store/authStore'
+import { InstallPrompt } from '../components/InstallPrompt'
 
 export function Dashboard() {
   const { user, signOut } = useAuthStore()
@@ -100,6 +101,7 @@ export function Dashboard() {
           </div>
         )}
       </main>
+      <InstallPrompt />
     </div>
   )
 }
