@@ -1,42 +1,44 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuthStore } from '../store/authStore'
 
-const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', '⌫']
 const PIN_LENGTH = 6
 
 export function AuthPage() {
   const { unlock } = useAuthStore()
   const [pin, setPin] = useState('')
   const [error, setError] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
 
-  const handleKey = (key: string) => {
-    if (key === '⌫') {
-      setPin((p) => p.slice(0, -1))
-      setError(false)
-      return
-    }
-    if (key === '' || pin.length >= PIN_LENGTH) return
+  // Auto-focus hidden input on mount so keyboard pops up
+  useEffect(() => {
+    inputRef.current?.focus()
+  }, [])
 
-    const next = pin + key
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, '').slice(0, PIN_LENGTH)
+    setPin(value)
+    setError(false)
 
-    if (next.length === PIN_LENGTH) {
-      const ok = unlock(next)
+    if (value.length === PIN_LENGTH) {
+      const ok = unlock(value)
       if (!ok) {
         setError(true)
         setTimeout(() => {
           setPin('')
           setError(false)
+          inputRef.current?.focus()
         }, 600)
       }
       // if ok, App.tsx redirects automatically via authed state
-    } else {
-      setPin(next)
     }
   }
 
   return (
-    <div className="min-h-screen bg-bg-base flex flex-col items-center justify-center px-6 select-none">
+    <div
+      className="min-h-screen bg-bg-base flex flex-col items-center justify-center px-6 select-none"
+      onClick={() => inputRef.current?.focus()}
+    >
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
@@ -48,6 +50,19 @@ export function AuthPage() {
           <h1 className="text-2xl font-bold text-text-primary">Rep Rx</h1>
           <p className="text-text-muted text-xs mt-1">Enter your PIN</p>
         </div>
+
+        {/* Hidden native input — captures keyboard */}
+        <input
+          ref={inputRef}
+          type="tel"
+          inputMode="numeric"
+          pattern="[0-9]*"
+          maxLength={PIN_LENGTH}
+          value={pin}
+          onChange={handleChange}
+          className="absolute opacity-0 w-0 h-0 pointer-events-none"
+          autoComplete="off"
+        />
 
         {/* PIN dots */}
         <motion.div
@@ -83,25 +98,7 @@ export function AuthPage() {
           )}
         </AnimatePresence>
 
-        {/* Numpad */}
-        <div className="grid grid-cols-3 gap-3 w-full">
-          {KEYS.map((key, i) => (
-            <button
-              key={i}
-              onClick={() => handleKey(key)}
-              disabled={key === ''}
-              className={`h-16 rounded-md text-xl font-medium transition-all active:scale-95 ${
-                key === ''
-                  ? 'invisible pointer-events-none'
-                  : key === '⌫'
-                  ? 'bg-bg-elevated border border-border text-text-secondary text-base'
-                  : 'bg-bg-surface border border-border text-text-primary hover:border-accent'
-              }`}
-            >
-              {key}
-            </button>
-          ))}
-        </div>
+        <p className="text-text-muted text-xs">Tap anywhere to open keyboard</p>
       </motion.div>
     </div>
   )
