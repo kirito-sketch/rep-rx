@@ -1,9 +1,160 @@
+import { useEffect, useRef, useState } from 'react'
+import { motion } from 'framer-motion'
+import { useNavigate } from 'react-router-dom'
+import { useOnboardingStore } from '../../store/onboardingStore'
+import { generateProgram } from '../../lib/generateProgram'
+import { getOrCacheExercise } from '../../lib/exerciseDb'
+import { supabase } from '../../lib/supabase'
+
+const STEPS = [
+  'Analyzing your goals...',
+  'Mapping injury constraints...',
+  'Selecting exercises...',
+  'Building your 4-week split...',
+  'Saving your program...',
+]
+
 export function ProgramGeneratingStep() {
+  const { data, reset } = useOnboardingStore()
+  const navigate = useNavigate()
+  const [currentStep, setCurrentStep] = useState(0)
+  const [error, setError] = useState<string | null>(null)
+  const ran = useRef(false)
+
+  useEffect(() => {
+    if (ran.current) return
+    ran.current = true
+
+    const stepInterval = setInterval(() => {
+      setCurrentStep((s) => Math.min(s + 1, STEPS.length - 1))
+    }, 1400)
+
+    const run = async () => {
+      try {
+        const program = await generateProgram(data as any)
+
+        const {
+          data: { user },
+        } = await supabase.auth.getUser()
+        if (!user) throw new Error('Not authenticated')
+
+        // Upsert profile
+        await supabase.from('profiles').upsert({
+          id: user.id,
+          goal: data.goal,
+          days_per_week: data.daysPerWeek,
+          gym_type: data.gymType,
+          onboarded: true,
+        })
+
+        // Save injuries
+        if (data.injuries && data.injuries.length > 0) {
+          await supabase.from('injuries').insert(
+            data.injuries.map((i) => ({
+              user_id: user.id,
+              body_part: i.bodyPart,
+              pain_scale: i.painScale,
+              avoid_movements: i.avoidMovements,
+              active: true,
+            }))
+          )
+        }
+
+        // Save program
+        const { data: prog, error: progErr } = await supabase
+          .from('programs')
+          .insert({
+            user_id: user.id,
+            name: program.name,
+            week_count: program.weekCount,
+            active: true,
+          })
+          .select()
+          .single()
+
+        if (progErr || !prog) throw new Error('Failed to save program')
+
+        // Save templates + exercises
+        for (const day of program.split) {
+          const { data: tmpl, error: tmplErr } = await supabase
+            .from('workout_templates')
+            .insert({
+              program_id: prog.id,
+              day_of_week: day.dayOfWeek,
+              label: day.label,
+              order_index: day.dayOfWeek,
+            })
+            .select()
+            .single()
+
+          if (tmplErr || !tmpl) continue
+
+          // Cache exercises in parallel, then insert template_exercises
+          const exerciseRecords = await Promise.all(
+            day.exercises.map((ex) => getOrCacheExercise(ex.name))
+          )
+
+          await supabase.from('template_exercises').insert(
+            day.exercises.map((ex, i) => ({
+              template_id: tmpl.id,
+              exercise_id: exerciseRecords[i]?.id ?? ex.name.toLowerCase().replace(/\s+/g, '-'),
+              target_sets: ex.sets,
+              target_reps_min: ex.repsMin,
+              target_reps_max: ex.repsMax,
+              target_weight: ex.startingWeightKg,
+              rest_seconds: ex.restSeconds,
+              order_index: i,
+            }))
+          )
+        }
+
+        clearInterval(stepInterval)
+        reset()
+        navigate('/')
+      } catch (err) {
+        clearInterval(stepInterval)
+        console.error(err)
+        setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
+      }
+    }
+
+    run()
+    return () => clearInterval(stepInterval)
+  }, [])
+
+  if (error) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center gap-4 text-center">
+        <p className="text-red-400 text-sm">{error}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="text-accent text-sm underline"
+        >
+          Try again
+        </button>
+      </div>
+    )
+  }
+
   return (
-    <div className="flex-1 flex flex-col items-center justify-center gap-4">
-      <div className="w-8 h-8 border-2 border-bg-elevated border-t-accent rounded-full animate-spin" />
-      <p className="text-text-primary font-medium text-sm">Building your program...</p>
-      <p className="text-text-muted text-xs">Full AI generation in Task 5</p>
+    <div className="flex-1 flex flex-col items-center justify-center gap-8">
+      <motion.div
+        animate={{ rotate: 360 }}
+        transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+        className="w-10 h-10 border-2 border-bg-elevated border-t-accent rounded-full"
+      />
+      <div className="text-center">
+        <p className="text-text-primary font-medium">Building your program</p>
+        <motion.p
+          key={currentStep}
+          initial={{ opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2 }}
+          className="text-text-muted text-sm mt-1"
+        >
+          {STEPS[currentStep]}
+        </motion.p>
+      </div>
     </div>
   )
 }
