@@ -1,14 +1,18 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-  html { background-color: #020617; color: #f8fafc; }
-  body { font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  html { background-color: #F8F6F2; color: #1A1614; }
+  body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
   * { box-sizing: border-box; }
 }
 
 @layer utilities {
   .tabular { font-variant-numeric: tabular-nums; font-family: 'JetBrains Mono', monospace; }
+  .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+
+  /* Bottom nav safe area */
+  .pb-nav { padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }
 }

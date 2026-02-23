@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { MuscleGroupIcon, muscleFromName } from './MuscleGroupIcon'
 
 interface TemplateExercise {
   id: string
@@ -7,7 +8,7 @@ interface TemplateExercise {
   target_sets: number
   target_reps_min: number
   target_reps_max: number
-  exercises?: { name: string } | null
+  exercises?: { name: string; muscle_group_primary?: string } | null
 }
 
 interface Template {
@@ -18,47 +19,75 @@ interface Template {
 
 export function TodayCard({ template }: { template: Template }) {
   const navigate = useNavigate()
-  const exerciseCount = template.template_exercises?.length ?? 0
+  const exercises = template.template_exercises ?? []
+  const exerciseCount = exercises.length
+
+  // Pick the first exercise's muscle for the card illustration
+  const firstExercise = exercises[0]
+  const primaryMuscle =
+    (firstExercise?.exercises?.muscle_group_primary
+      ? firstExercise.exercises.muscle_group_primary.toLowerCase()
+      : null) ??
+    muscleFromName(firstExercise?.exercises?.name ?? firstExercise?.exercise_id ?? '')
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 8 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      className="bg-bg-surface border border-border rounded-md p-6"
+      transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
+      className="bg-white rounded-xl shadow-card overflow-hidden"
     >
-      <div className="mb-5">
-        <p className="text-accent-text text-xs font-medium uppercase tracking-widest mb-1">
-          Today
-        </p>
-        <h2 className="text-text-primary font-semibold text-lg leading-tight">
-          {template.label}
-        </h2>
-        <p className="text-text-muted text-xs mt-1">{exerciseCount} exercises</p>
+      {/* Card top: illustration strip */}
+      <div className="relative bg-accent-dim flex items-center justify-between px-5 py-4">
+        <div>
+          <p className="text-accent text-[11px] font-bold uppercase tracking-widest mb-0.5">
+            Today's Workout
+          </p>
+          <h2 className="text-text-primary font-extrabold text-xl leading-tight">
+            {template.label}
+          </h2>
+          <p className="text-text-secondary text-xs mt-0.5 font-medium">
+            {exerciseCount} exercises
+          </p>
+        </div>
+        <div className="opacity-80">
+          <MuscleGroupIcon
+            muscle={primaryMuscle as any}
+            size={72}
+            accent="#EA580C"
+            baseColor="#E3DDD4"
+          />
+        </div>
       </div>
 
-      <div className="flex flex-col gap-2 mb-6">
-        {template.template_exercises?.slice(0, 4).map((te) => (
-          <div key={te.id} className="flex items-center justify-between py-1">
-            <span className="text-text-secondary text-sm">
-              {te.exercises?.name ?? te.exercise_id}
-            </span>
-            <span className="text-text-muted text-xs tabular">
-              {te.target_sets}×{te.target_reps_min}–{te.target_reps_max}
-            </span>
-          </div>
-        ))}
+      {/* Exercise list */}
+      <div className="px-5 pt-3 pb-4">
+        <div className="divide-y divide-border-subtle">
+          {exercises.slice(0, 4).map((te) => (
+            <div key={te.id} className="flex items-center justify-between py-2.5">
+              <span className="text-text-primary text-sm font-medium">
+                {te.exercises?.name ?? te.exercise_id}
+              </span>
+              <span className="tabular text-text-muted text-xs font-medium bg-bg-elevated px-2 py-0.5 rounded-md">
+                {te.target_sets}×{te.target_reps_min}–{te.target_reps_max}
+              </span>
+            </div>
+          ))}
+        </div>
+
         {exerciseCount > 4 && (
-          <p className="text-text-muted text-xs">+{exerciseCount - 4} more</p>
+          <p className="text-text-muted text-xs mt-1 mb-2">
+            +{exerciseCount - 4} more exercises
+          </p>
         )}
-      </div>
 
-      <button
-        onClick={() => navigate(`/session/${template.id}`)}
-        className="w-full bg-accent text-white font-semibold rounded-md py-4 text-sm transition-opacity active:opacity-80"
-      >
-        Start Session →
-      </button>
+        <button
+          onClick={() => navigate(`/session/${template.id}`)}
+          className="mt-3 w-full bg-accent text-white font-bold rounded-lg py-4 text-sm tracking-wide transition-opacity active:opacity-80"
+        >
+          Start Session →
+        </button>
+      </div>
     </motion.div>
   )
 }

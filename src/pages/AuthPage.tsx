@@ -10,7 +10,6 @@ export function AuthPage() {
   const [error, setError] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  // Auto-focus hidden input on mount so keyboard pops up
   useEffect(() => {
     inputRef.current?.focus()
   }, [])
@@ -30,7 +29,6 @@ export function AuthPage() {
           inputRef.current?.focus()
         }, 600)
       }
-      // if ok, App.tsx redirects automatically via authed state
     }
   }
 
@@ -42,16 +40,19 @@ export function AuthPage() {
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
+        transition={{ duration: 0.35 }}
         className="w-full max-w-xs flex flex-col items-center gap-10"
       >
         {/* Wordmark */}
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-text-primary">Rep Rx</h1>
-          <p className="text-text-muted text-xs mt-1">Enter your PIN</p>
+          <div className="inline-flex items-center justify-center w-14 h-14 bg-accent rounded-2xl mb-4 shadow-lift">
+            <span className="text-white text-2xl font-extrabold">Rx</span>
+          </div>
+          <h1 className="text-2xl font-extrabold text-text-primary">Rep Rx</h1>
+          <p className="text-text-muted text-sm mt-1">Enter your PIN to continue</p>
         </div>
 
-        {/* Hidden native input — captures keyboard */}
+        {/* Hidden native input */}
         <input
           ref={inputRef}
           type="tel"
@@ -73,25 +74,25 @@ export function AuthPage() {
           {Array.from({ length: PIN_LENGTH }).map((_, i) => (
             <div
               key={i}
-              className={`w-3 h-3 rounded-full border transition-all duration-150 ${
+              className={`w-3.5 h-3.5 rounded-full border-2 transition-all duration-150 ${
                 i < pin.length
                   ? error
                     ? 'bg-red-500 border-red-500'
-                    : 'bg-accent border-accent'
+                    : 'bg-accent border-accent scale-110'
                   : 'bg-transparent border-border'
               }`}
             />
           ))}
         </motion.div>
 
-        {/* Error */}
+        {/* Error message */}
         <AnimatePresence>
           {error && (
             <motion.p
               initial={{ opacity: 0, y: -4 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              className="text-red-400 text-xs -mt-6"
+              className="text-red-500 text-sm font-medium -mt-6"
             >
               Incorrect PIN
             </motion.p>

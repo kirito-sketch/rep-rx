@@ -30,7 +30,6 @@ export function SessionPage() {
     if (!templateId) return
     resetSession()
 
-    // Load template
     supabase
       .from('workout_templates')
       .select(
@@ -46,7 +45,6 @@ export function SessionPage() {
       .single()
       .then(({ data }) => setTemplate(data))
 
-    // Create session record (once)
     if (!sessionCreated.current) {
       sessionCreated.current = true
       startedAt.current = new Date()
@@ -75,17 +73,14 @@ export function SessionPage() {
   const allSetsLogged = currentSet > (currentExercise?.target_sets ?? 3)
 
   const handleNext = () => {
-    if (isLastExercise) {
-      setDone(true)
-    } else {
-      nextExercise()
-    }
+    if (isLastExercise) setDone(true)
+    else nextExercise()
   }
 
   if (!template) {
     return (
       <div className="min-h-screen bg-bg-base flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-bg-elevated border-t-accent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-border border-t-accent rounded-full animate-spin" />
       </div>
     )
   }
@@ -103,19 +98,27 @@ export function SessionPage() {
   return (
     <div className="min-h-screen bg-bg-base flex flex-col">
       {/* Header */}
-      <header className="flex items-center justify-between px-6 pt-12 pb-4 flex-shrink-0">
+      <header className="flex items-center justify-between px-5 pt-12 pb-3 flex-shrink-0 bg-bg-base border-b border-border">
         <button
           onClick={() => navigate('/')}
-          className="text-text-muted text-sm"
+          className="flex items-center gap-1.5 text-text-secondary text-sm font-semibold"
         >
-          ← Exit
+          <span className="text-base">←</span>
+          <span>Exit</span>
         </button>
-        <p className="text-text-secondary text-sm tabular">
-          {currentExerciseIndex + 1} / {exercises.length}
+
+        <div className="text-center">
+          <p className="text-text-primary text-sm font-bold truncate max-w-[140px]">
+            {template.label}
+          </p>
+        </div>
+
+        <p className="text-text-muted text-sm tabular font-medium">
+          {currentExerciseIndex + 1}/{exercises.length}
         </p>
       </header>
 
-      <main className="flex-1 flex flex-col px-6 gap-5 overflow-y-auto pb-48">
+      <main className="flex-1 flex flex-col px-5 gap-4 overflow-y-auto pb-48 pt-4">
         {/* Exercise name */}
         <AnimatePresence mode="wait">
           <motion.div
@@ -125,11 +128,11 @@ export function SessionPage() {
             exit={{ opacity: 0, x: -16 }}
             transition={{ duration: 0.2 }}
           >
-            <h2 className="text-text-primary font-semibold text-lg leading-tight">
+            <h2 className="text-text-primary font-extrabold text-xl leading-tight">
               {currentExercise?.exercises?.name ?? currentExercise?.exercise_id}
             </h2>
             {currentExercise?.exercises?.muscle_group_primary && (
-              <p className="text-text-muted text-xs mt-0.5">
+              <p className="text-text-muted text-xs mt-0.5 font-medium capitalize">
                 {currentExercise.exercises.muscle_group_primary}
               </p>
             )}
@@ -150,7 +153,7 @@ export function SessionPage() {
         {allSetsLogged ? (
           <button
             onClick={handleNext}
-            className="w-full bg-accent text-white font-semibold rounded-md py-5 text-base"
+            className="w-full bg-accent text-white font-extrabold rounded-xl py-5 text-base tracking-wide active:opacity-80 transition-opacity shadow-lift"
           >
             {isLastExercise ? 'Finish Session →' : 'Next Exercise →'}
           </button>

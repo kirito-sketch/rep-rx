@@ -37,6 +37,19 @@ Session: ${summary.exerciseCount} exercises, ${Math.round(summary.totalVolumeKg)
   }
 }
 
+function StatBox({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
+  return (
+    <div className={`flex-1 rounded-xl p-3 text-center ${highlight ? 'bg-success-dim' : 'bg-bg-elevated'}`}>
+      <p className={`tabular text-2xl font-extrabold ${highlight ? 'text-success' : 'text-text-primary'}`}>
+        {value}
+      </p>
+      <p className={`text-[11px] font-medium mt-0.5 ${highlight ? 'text-success-text' : 'text-text-muted'}`}>
+        {label}
+      </p>
+    </div>
+  )
+}
+
 export function SessionWrap({ sessionId, setLogs, startedAt }: Props) {
   const navigate = useNavigate()
   const [aiNote, setAiNote] = useState<string | null>(null)
@@ -61,12 +74,7 @@ export function SessionWrap({ sessionId, setLogs, startedAt }: Props) {
     const uniqueExercises = new Set(setLogs.map((s) => s.exerciseId)).size
     const prs = setLogs.filter((s) => s.isPr).length
 
-    setSummary({
-      totalVolume,
-      durationMins,
-      exerciseCount: uniqueExercises,
-      prs,
-    })
+    setSummary({ totalVolume, durationMins, exerciseCount: uniqueExercises, prs })
 
     // Persist set logs
     const logsToInsert = setLogs.map((s) => ({
@@ -76,7 +84,6 @@ export function SessionWrap({ sessionId, setLogs, startedAt }: Props) {
       weight_kg: s.weightKg,
       reps: s.reps,
     }))
-
     supabase.from('set_logs').insert(logsToInsert)
 
     // Update session record
@@ -107,65 +114,58 @@ export function SessionWrap({ sessionId, setLogs, startedAt }: Props) {
   }, [])
 
   return (
-    <div className="min-h-screen bg-bg-base flex flex-col items-center justify-center px-6">
+    <div className="min-h-screen bg-bg-base flex flex-col items-center justify-center px-5">
       <motion.div
         initial={{ opacity: 0, scale: 0.96 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.3 }}
-        className="w-full max-w-sm flex flex-col gap-6"
+        transition={{ duration: 0.35 }}
+        className="w-full max-w-sm flex flex-col gap-5"
       >
+        {/* Header */}
         <div>
-          <p className="text-accent-text text-xs uppercase tracking-widest mb-1">
+          <p className="text-accent text-[11px] font-bold uppercase tracking-widest mb-1">
             Session complete
           </p>
-          <h2 className="text-text-primary text-3xl font-bold">Done.</h2>
+          <h2 className="text-text-primary text-4xl font-extrabold">Done.</h2>
         </div>
 
         {summary && (
-          <div className="bg-bg-surface border border-border rounded-md overflow-hidden">
-            <div className="flex justify-between px-4 py-3 border-b border-border">
-              <span className="text-text-muted text-sm">Volume</span>
-              <span className="tabular text-text-primary text-sm font-semibold">
-                {Math.round(summary.totalVolume)} kg
-              </span>
+          <>
+            <div className="flex gap-2">
+              <StatBox
+                label="volume"
+                value={`${Math.round(summary.totalVolume).toLocaleString()} kg`}
+              />
+              <StatBox label="duration" value={`${summary.durationMins} min`} />
+              <StatBox label="exercises" value={`${summary.exerciseCount}`} />
             </div>
-            <div className="flex justify-between px-4 py-3 border-b border-border">
-              <span className="text-text-muted text-sm">Duration</span>
-              <span className="tabular text-text-primary text-sm font-semibold">
-                {summary.durationMins} min
-              </span>
-            </div>
-            <div className="flex justify-between px-4 py-3 border-b border-border">
-              <span className="text-text-muted text-sm">Exercises</span>
-              <span className="tabular text-text-primary text-sm font-semibold">
-                {summary.exerciseCount}
-              </span>
-            </div>
+
             {summary.prs > 0 && (
-              <div className="px-4 py-3">
-                <span className="text-green-400 text-sm font-semibold">
-                  PR on {summary.prs} exercise{summary.prs > 1 ? 's' : ''}
-                </span>
+              <div className="bg-success-dim rounded-xl px-4 py-3 flex items-center gap-3">
+                <span className="text-2xl">🏆</span>
+                <p className="text-success-text text-sm font-bold">
+                  {summary.prs} personal record{summary.prs > 1 ? 's' : ''} today
+                </p>
               </div>
             )}
-          </div>
+          </>
         )}
 
         {aiNote && (
-          <motion.p
+          <motion.div
             initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-text-secondary text-sm border-l-2 border-accent pl-4 italic"
+            className="bg-white rounded-xl shadow-card px-4 py-3 border-l-4 border-accent"
           >
-            {aiNote}
-          </motion.p>
+            <p className="text-text-secondary text-sm italic leading-relaxed">{aiNote}</p>
+          </motion.div>
         )}
 
         <button
           onClick={() => navigate('/')}
-          className="w-full bg-accent text-white font-semibold rounded-md py-4 text-sm"
+          className="w-full bg-accent text-white font-extrabold rounded-xl py-4 text-sm tracking-wide active:opacity-80 transition-opacity"
         >
-          Back to Dashboard
+          Back to Home
         </button>
       </motion.div>
     </div>
