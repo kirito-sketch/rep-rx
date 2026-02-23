@@ -5,6 +5,7 @@ import { useAuthStore } from './store/authStore'
 import { AuthPage } from './pages/AuthPage'
 import { Dashboard } from './pages/Dashboard'
 import { OnboardingFlow } from './pages/OnboardingFlow'
+import { SessionPage } from './pages/SessionPage'
 
 export default function App() {
   const { user, loading, setUser } = useAuthStore()
@@ -35,6 +36,10 @@ export default function App() {
         <Route
           path="/onboarding"
           element={user ? <OnboardingFlow /> : <Navigate to="/auth" replace />}
+        />
+        <Route
+          path="/session/:templateId"
+          element={user ? <SessionPage /> : <Navigate to="/auth" replace />}
         />
         <Route
           path="/*"
