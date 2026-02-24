@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { TodayCard } from '../components/TodayCard'
 import { WeekStrip } from '../components/WeekStrip'
-import { useAuthStore } from '../store/authStore'
 import { InstallPrompt } from '../components/InstallPrompt'
 
 function getGreeting() {
@@ -56,7 +55,6 @@ function UpcomingWorkouts({ templates }: { templates: any[] }) {
 }
 
 export function Dashboard() {
-  const { signOut } = useAuthStore()
   const navigate = useNavigate()
   const [todayTemplate, setTodayTemplate] = useState<any>(null)
   const [upcomingTemplates, setUpcomingTemplates] = useState<any[]>([])
@@ -136,21 +134,13 @@ export function Dashboard() {
     <div className="min-h-screen bg-bg-base">
       {/* Header */}
       <header className="px-5 pt-12 pb-5">
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="text-text-muted text-xs font-semibold uppercase tracking-widest">
-              {dateStr}
-            </p>
-            <h1 className="text-text-primary font-extrabold text-2xl mt-0.5">
-              {getGreeting()}
-            </h1>
-          </div>
-          <button
-            onClick={signOut}
-            className="mt-1 text-text-muted text-xs border border-border bg-white rounded-lg px-3 py-2 font-medium shadow-card"
-          >
-            Lock
-          </button>
+        <div>
+          <p className="text-text-muted text-xs font-semibold uppercase tracking-widest">
+            {dateStr}
+          </p>
+          <h1 className="text-text-primary font-extrabold text-2xl mt-0.5">
+            {getGreeting()}
+          </h1>
         </div>
       </header>
 

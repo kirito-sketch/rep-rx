@@ -8,11 +8,12 @@ interface NavItem {
 }
 
 function HomeIcon({ active }: { active: boolean }) {
+  const c = active ? '#EA580C' : '#A59D95'
   return (
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
       <path
-        d="M3 9.5L11 3L19 9.5V19C19 19.6 18.6 20 18 20H14V15H8V20H4C3.4 20 3 19.6 3 19V9.5Z"
-        stroke={active ? '#EA580C' : '#A59D95'}
+        d="M3 10.5L12 3L21 10.5V21C21 21.6 20.6 22 20 22H15.5V16.5H8.5V22H4C3.4 22 3 21.6 3 21V10.5Z"
+        stroke={c}
         strokeWidth="1.75"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -22,57 +23,45 @@ function HomeIcon({ active }: { active: boolean }) {
   )
 }
 
-function WeekIcon({ active }: { active: boolean }) {
-  const color = active ? '#EA580C' : '#A59D95'
+function ProgramIcon({ active }: { active: boolean }) {
+  const c = active ? '#EA580C' : '#A59D95'
   return (
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-      <rect
-        x="3" y="5" width="16" height="14" rx="2.5"
-        stroke={color}
-        strokeWidth="1.75"
-        fill={active ? '#FFF4EC' : 'none'}
-      />
-      <path d="M3 9.5H19" stroke={color} strokeWidth="1.75" strokeLinecap="round" />
-      <path d="M7.5 3V6.5" stroke={color} strokeWidth="1.75" strokeLinecap="round" />
-      <path d="M14.5 3V6.5" stroke={color} strokeWidth="1.75" strokeLinecap="round" />
-      <circle cx="7.5" cy="14" r="1" fill={color} />
-      <circle cx="11" cy="14" r="1" fill={color} />
-      <circle cx="14.5" cy="14" r="1" fill={color} />
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <rect x="3" y="5" width="18" height="16" rx="2.5" stroke={c} strokeWidth="1.75" fill={active ? '#FFF4EC' : 'none'} />
+      <path d="M3 10H21" stroke={c} strokeWidth="1.75" strokeLinecap="round" />
+      <path d="M8 3V7" stroke={c} strokeWidth="1.75" strokeLinecap="round" />
+      <path d="M16 3V7" stroke={c} strokeWidth="1.75" strokeLinecap="round" />
+      <path d="M7 15H17" stroke={c} strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M7 18.5H13" stroke={c} strokeWidth="1.5" strokeLinecap="round" />
     </svg>
   )
 }
 
-function HistoryIcon({ active }: { active: boolean }) {
-  const color = active ? '#EA580C' : '#A59D95'
+function LogIcon({ active }: { active: boolean }) {
+  const c = active ? '#EA580C' : '#A59D95'
   return (
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-      <circle
-        cx="11" cy="11" r="8"
-        stroke={color}
-        strokeWidth="1.75"
-        fill={active ? '#FFF4EC' : 'none'}
-      />
-      <path d="M11 7V11.5L14 13.5" stroke={color} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="9" stroke={c} strokeWidth="1.75" fill={active ? '#FFF4EC' : 'none'} />
+      <path d="M12 7.5V12.5L15.5 14.5" stroke={c} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function ProfileIcon({ active }: { active: boolean }) {
+  const c = active ? '#EA580C' : '#A59D95'
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="8" r="4" stroke={c} strokeWidth="1.75" fill={active ? '#FFF4EC' : 'none'} />
+      <path d="M4 20C4 17 7.6 14.5 12 14.5C16.4 14.5 20 17 20 20" stroke={c} strokeWidth="1.75" strokeLinecap="round" />
     </svg>
   )
 }
 
 const NAV_ITEMS: NavItem[] = [
-  {
-    label: 'Home',
-    path: '/',
-    icon: (active) => <HomeIcon active={active} />,
-  },
-  {
-    label: 'Week',
-    path: '/week',
-    icon: (active) => <WeekIcon active={active} />,
-  },
-  {
-    label: 'Activity',
-    path: '/history',
-    icon: (active) => <HistoryIcon active={active} />,
-  },
+  { label: 'Today', path: '/', icon: (a) => <HomeIcon active={a} /> },
+  { label: 'Program', path: '/week', icon: (a) => <ProgramIcon active={a} /> },
+  { label: 'Log', path: '/history', icon: (a) => <LogIcon active={a} /> },
+  { label: 'Profile', path: '/profile', icon: (a) => <ProfileIcon active={a} /> },
 ]
 
 export function BottomNav() {
@@ -81,8 +70,12 @@ export function BottomNav() {
 
   return (
     <div
-      className="fixed bottom-0 left-0 right-0 bg-white border-t border-border"
-      style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+      className="fixed bottom-0 left-0 right-0 bg-white/90 border-t border-border"
+      style={{
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+      }}
     >
       <div className="flex">
         {NAV_ITEMS.map((item) => {
@@ -94,8 +87,11 @@ export function BottomNav() {
             <button
               key={item.path}
               onClick={() => navigate(item.path)}
-              className="flex-1 flex flex-col items-center gap-1 py-3 transition-opacity active:opacity-60"
+              className="flex-1 flex flex-col items-center gap-1 py-2.5 relative transition-opacity active:opacity-50"
             >
+              {active && (
+                <span className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-0.5 rounded-full bg-accent" />
+              )}
               {item.icon(active)}
               <span
                 className={`text-[10px] font-semibold tracking-wide ${

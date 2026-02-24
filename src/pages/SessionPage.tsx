@@ -7,6 +7,7 @@ import { ExerciseMediaCard } from '../components/session/ExerciseMediaCard'
 import { SetLogger } from '../components/session/SetLogger'
 import { RestTimer } from '../components/session/RestTimer'
 import { SessionWrap } from '../components/session/SessionWrap'
+import { tutorialUrl } from '../lib/youtube'
 
 export function SessionPage() {
   const { templateId } = useParams<{ templateId: string }>()
@@ -113,14 +114,31 @@ export function SessionPage() {
           transition={{ duration: 0.22 }}
           className="flex-none px-5 pt-4 pb-3"
         >
-          <h2 className="text-text-primary font-extrabold text-xl leading-tight">
-            {currentExercise?.exercises?.name ?? currentExercise?.exercise_id}
-          </h2>
-          {currentExercise?.exercises?.muscle_group_primary && (
-            <p className="text-text-muted text-xs mt-0.5 font-medium capitalize">
-              {currentExercise.exercises.muscle_group_primary}
-            </p>
-          )}
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex-1 min-w-0">
+              <h2 className="text-text-primary font-extrabold text-xl leading-tight">
+                {currentExercise?.exercises?.name ?? currentExercise?.exercise_id}
+              </h2>
+              {currentExercise?.exercises?.muscle_group_primary && (
+                <p className="text-text-muted text-xs mt-0.5 font-medium capitalize">
+                  {currentExercise.exercises.muscle_group_primary}
+                </p>
+              )}
+            </div>
+            {currentExercise?.exercises?.name && (
+              <a
+                href={tutorialUrl(currentExercise.exercises.name)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-none flex items-center gap-1 text-[11px] font-semibold text-accent border border-accent/30 bg-accent-dim rounded-lg px-2.5 py-1.5 active:opacity-70 transition-opacity whitespace-nowrap"
+              >
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <polygon points="2,1 11,6 2,11" fill="#EA580C" />
+                </svg>
+                Watch
+              </a>
+            )}
+          </div>
         </motion.div>
       </AnimatePresence>
 

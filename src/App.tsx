@@ -7,10 +7,11 @@ import { OnboardingFlow } from './pages/OnboardingFlow'
 import { SessionPage } from './pages/SessionPage'
 import { WeekPage } from './pages/WeekPage'
 import { HistoryPage } from './pages/HistoryPage'
+import { ProfilePage } from './pages/ProfilePage'
 import { BottomNav } from './components/BottomNav'
 
 // Routes that should show the bottom navigation
-const NAV_ROUTES = ['/', '/week', '/history']
+const NAV_ROUTES = ['/', '/week', '/history', '/profile']
 
 function AppLayout({ authed }: { authed: boolean }) {
   const location = useLocation()
@@ -38,6 +39,10 @@ function AppLayout({ authed }: { authed: boolean }) {
         <Route
           path="/history"
           element={authed ? <HistoryPage /> : <Navigate to="/auth" replace />}
+        />
+        <Route
+          path="/profile"
+          element={authed ? <ProfilePage /> : <Navigate to="/auth" replace />}
         />
         <Route
           path="/*"
