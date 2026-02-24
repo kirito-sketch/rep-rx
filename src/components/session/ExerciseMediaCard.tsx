@@ -28,7 +28,8 @@ export function ExerciseMediaCard({ exerciseName, gifUrl, primaryMuscle, seconda
   const pipType = primaryId && POSTERIOR_MUSCLES.has(primaryId) ? 'posterior' : 'anterior'
 
   return (
-    <div className="w-full rounded-2xl overflow-hidden bg-bg-elevated" style={{ height: 148 }}>
+    /* relative is required for the GIF PiP overlay (absolute positioning) */
+    <div className="relative w-full rounded-xl overflow-hidden bg-bg-elevated" style={{ height: 148 }}>
       {showGif ? (
         <>
           <div className="w-full h-full flex items-center justify-center bg-white px-4">
@@ -54,7 +55,6 @@ export function ExerciseMediaCard({ exerciseName, gifUrl, primaryMuscle, seconda
           )}
         </>
       ) : (
-        /* Dual anatomy view — anterior + posterior side by side */
         <div className="w-full h-full flex items-center px-5 gap-2">
           {muscleData.length > 0 ? (
             <>

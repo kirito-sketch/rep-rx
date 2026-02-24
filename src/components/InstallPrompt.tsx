@@ -52,7 +52,8 @@ export function InstallPrompt() {
           animate={{ y: 0 }}
           exit={{ y: '100%' }}
           transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-          className="fixed bottom-0 left-0 right-0 bg-bg-surface border-t border-border px-6 pt-4 pb-10 flex items-center justify-between z-50"
+          className="fixed bottom-0 left-0 right-0 bg-bg-surface border-t border-border px-6 pt-4 flex items-center justify-between z-50"
+          style={{ paddingBottom: 'calc(24px + env(safe-area-inset-bottom, 0px))' }}
         >
           <div>
             <p className="text-text-primary text-sm font-medium">Add to Home Screen</p>
@@ -67,7 +68,7 @@ export function InstallPrompt() {
             </button>
             <button
               onClick={handleInstall}
-              className="bg-accent text-white text-sm font-medium px-4 py-2 rounded-md"
+              className="bg-accent text-white text-sm font-bold px-4 py-2 rounded-xl"
             >
               Install
             </button>

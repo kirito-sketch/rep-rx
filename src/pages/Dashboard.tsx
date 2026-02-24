@@ -23,32 +23,35 @@ function RestDayCard() {
 }
 
 function UpcomingWorkouts({ templates }: { templates: any[] }) {
+  const navigate = useNavigate()
   if (!templates.length) return null
+  const dayNames = ['', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
   return (
     <div>
       <h3 className="text-text-secondary text-xs font-bold uppercase tracking-widest mb-2 px-1">
         Coming up
       </h3>
       <div className="flex flex-col gap-2">
-        {templates.slice(0, 3).map((t) => {
-          const dayNames = ['', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-          return (
-            <div
-              key={t.id}
-              className="bg-white rounded-xl shadow-card px-4 py-3 flex items-center justify-between"
-            >
-              <div>
-                <p className="text-text-secondary text-[11px] font-semibold uppercase tracking-wide">
-                  {dayNames[t.day_of_week]}
-                </p>
-                <p className="text-text-primary text-sm font-semibold">{t.label}</p>
-              </div>
+        {templates.slice(0, 3).map((t) => (
+          <button
+            key={t.id}
+            onClick={() => navigate(`/session/${t.id}`)}
+            className="bg-white rounded-xl shadow-card px-4 py-3 flex items-center justify-between text-left w-full active:bg-bg-elevated transition-colors"
+          >
+            <div>
+              <p className="text-text-secondary text-[11px] font-semibold uppercase tracking-wide">
+                {dayNames[t.day_of_week]}
+              </p>
+              <p className="text-text-primary text-sm font-semibold">{t.label}</p>
+            </div>
+            <div className="flex items-center gap-2">
               <span className="text-text-muted text-xs">
                 {t.template_exercises?.length ?? 0} ex
               </span>
+              <span className="text-text-muted text-sm">→</span>
             </div>
-          )
-        })}
+          </button>
+        ))}
       </div>
     </div>
   )

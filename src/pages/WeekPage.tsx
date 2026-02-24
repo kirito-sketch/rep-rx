@@ -100,16 +100,18 @@ function WorkoutDayCard({ day, isToday }: { day: WorkoutDay; isToday: boolean })
         )}
       </div>
 
-      {isToday && (
-        <div className="px-4 pb-4">
-          <button
-            onClick={() => navigate(`/session/${day.id}`)}
-            className="w-full bg-accent text-white font-bold rounded-lg py-3.5 text-sm tracking-wide active:opacity-80 transition-opacity"
-          >
-            Start Session →
-          </button>
-        </div>
-      )}
+      <div className="px-4 pb-4">
+        <button
+          onClick={() => navigate(`/session/${day.id}`)}
+          className={`w-full font-bold rounded-xl py-3.5 text-sm tracking-wide active:opacity-80 transition-opacity ${
+            isToday
+              ? 'bg-accent text-white shadow-lift'
+              : 'bg-bg-elevated text-text-secondary border border-border'
+          }`}
+        >
+          {isToday ? 'Start Session →' : 'Start Workout →'}
+        </button>
+      </div>
     </motion.div>
   )
 }

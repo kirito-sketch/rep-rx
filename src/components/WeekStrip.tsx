@@ -38,7 +38,7 @@ export function WeekStrip({ workoutDays = [] }: WeekStripProps) {
 
             {/* Workout indicator dot */}
             <div
-              className={`mt-1.5 w-1.5 h-1.5 rounded-full transition-all ${
+              className={`mt-1.5 w-2 h-2 rounded-full transition-all ${
                 isToday
                   ? 'bg-white/60'
                   : hasWorkout

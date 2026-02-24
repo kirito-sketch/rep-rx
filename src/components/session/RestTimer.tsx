@@ -25,7 +25,8 @@ export function RestTimer() {
           animate={{ y: 0 }}
           exit={{ y: '100%' }}
           transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-          className="fixed bottom-0 left-0 right-0 bg-white border-t border-border px-6 pt-5 pb-10 shadow-lift"
+          className="fixed bottom-0 left-0 right-0 bg-white border-t border-border px-6 pt-5 shadow-lift"
+          style={{ paddingBottom: 'calc(40px + env(safe-area-inset-bottom, 0px))' }}
         >
           <div className="flex items-center justify-between mb-4">
             <div>

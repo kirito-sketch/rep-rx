@@ -106,14 +106,17 @@ export function TodayCard({ template }: { template: Template }) {
         </div>
 
         {exerciseCount > 4 && (
-          <p className="text-text-muted text-xs mt-1 mb-1">
-            +{exerciseCount - 4} more exercises
-          </p>
+          <button
+            onClick={() => navigate('/week')}
+            className="text-accent text-xs font-semibold mt-1 mb-1 active:opacity-70"
+          >
+            +{exerciseCount - 4} more →
+          </button>
         )}
 
         <button
           onClick={() => navigate(`/session/${template.id}`)}
-          className="mt-3 w-full bg-accent text-white font-bold rounded-lg py-4 text-sm tracking-wide transition-opacity active:opacity-80"
+          className="mt-3 w-full bg-accent text-white font-bold rounded-xl py-4 text-sm tracking-wide transition-opacity active:opacity-80"
         >
           Start Session →
         </button>
