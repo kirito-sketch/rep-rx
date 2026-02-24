@@ -96,7 +96,9 @@ export function ProgramGeneratingStep() {
 
           // Cache all exercises in parallel (each returns an exercise record with id)
           const exerciseRecords = await Promise.all(
-            day.exercises.map((ex) => getOrCacheExercise(ex.name))
+            day.exercises.map((ex) =>
+              getOrCacheExercise(ex.name, ex.muscleGroupPrimary, ex.muscleGroupSecondary)
+            )
           )
 
           // Insert template_exercises — only include rows where exercise was cached

@@ -9,6 +9,8 @@ export interface GeneratedExercise {
   startingWeightKg: number
   restSeconds: number
   injuryNote: string | null
+  muscleGroupPrimary: string | null
+  muscleGroupSecondary: string[]
 }
 
 export interface GeneratedDay {
@@ -52,6 +54,8 @@ PROGRAMMING RULES:
 - Starting weights should be conservative and realistic for a beginner-intermediate
 - 3-4 exercises per day, 3-4 sets, 8-15 rep ranges for muscle/general goals, 3-6 for strength
 - Rest 60-90s for hypertrophy, 2-3min for strength
+- For muscleGroupPrimary use one of: chest, back, shoulders, biceps, triceps, quads, hamstrings, glutes, calves, abs, obliques, traps, forearms, lats
+- For muscleGroupSecondary use an array of the same values (can be empty)
 
 Return ONLY valid JSON (no markdown, no explanation) matching this exact schema:
 {
@@ -69,7 +73,9 @@ Return ONLY valid JSON (no markdown, no explanation) matching this exact schema:
           "repsMax": 12,
           "startingWeightKg": 50,
           "restSeconds": 90,
-          "injuryNote": null
+          "injuryNote": null,
+          "muscleGroupPrimary": "chest",
+          "muscleGroupSecondary": ["triceps", "shoulders"]
         }
       ]
     }

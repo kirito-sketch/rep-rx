@@ -5,6 +5,8 @@
 import type { Muscle } from 'react-body-highlighter'
 
 export const MUSCLE_MAP: Record<string, Muscle> = {
+  // ExerciseDB-specific names
+  deltas: 'front-deltoids', spine: 'lower-back',
   // Chest
   chest: 'chest', 'upper chest': 'chest', pectorals: 'chest',
   'pectoralis major': 'chest', 'pectoralis minor': 'chest', 'serratus anterior': 'chest',

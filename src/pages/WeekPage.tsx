@@ -52,18 +52,34 @@ function WorkoutDayCard({ day, isToday }: { day: WorkoutDay; isToday: boolean })
           <h3 className="text-text-primary font-bold text-base">{day.label}</h3>
         </div>
 
-        {/* Body diagram thumbnail */}
-        <div className="flex-none w-[60px] h-[60px]">
+        {/* Body diagram — front & back thumbnail */}
+        <div className="flex-none flex items-center gap-0.5">
           {muscleData.length > 0 ? (
-            <Model
-              data={muscleData}
-              style={{ width: '100%', height: '100%' }}
-              highlightedColors={['#EA580C', '#FB923C']}
-              bodyColor="#D9CDBF"
-              onClick={() => {}}
-            />
+            <>
+              <div className="w-[34px] h-[54px]">
+                <Model
+                  data={muscleData}
+                  style={{ width: '100%', height: '100%' }}
+                  highlightedColors={['#EA580C', '#FB923C']}
+                  bodyColor="#D9CDBF"
+                  type="anterior"
+                  onClick={() => {}}
+                />
+              </div>
+              <div className="w-px h-8 bg-accent/20" />
+              <div className="w-[34px] h-[54px]">
+                <Model
+                  data={muscleData}
+                  style={{ width: '100%', height: '100%' }}
+                  highlightedColors={['#EA580C', '#FB923C']}
+                  bodyColor="#D9CDBF"
+                  type="posterior"
+                  onClick={() => {}}
+                />
+              </div>
+            </>
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-2xl opacity-50">💪</div>
+            <div className="w-16 h-12 flex items-center justify-center text-2xl opacity-50">💪</div>
           )}
         </div>
       </div>

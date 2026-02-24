@@ -56,18 +56,34 @@ export function TodayCard({ template }: { template: Template }) {
           </p>
         </div>
 
-        {/* Body diagram — shows all muscles targeted today */}
-        <div className="flex-none w-[80px] h-[80px]">
+        {/* Body diagram — front & back, shows all muscles targeted today */}
+        <div className="flex-none flex items-center gap-1">
           {muscleData.length > 0 ? (
-            <Model
-              data={muscleData}
-              style={{ width: '100%', height: '100%' }}
-              highlightedColors={['#EA580C', '#FB923C']}
-              bodyColor="#D9CDBF"
-              onClick={() => {}}
-            />
+            <>
+              <div className="w-[44px] h-[72px]">
+                <Model
+                  data={muscleData}
+                  style={{ width: '100%', height: '100%' }}
+                  highlightedColors={['#EA580C', '#FB923C']}
+                  bodyColor="#D9CDBF"
+                  type="anterior"
+                  onClick={() => {}}
+                />
+              </div>
+              <div className="w-px h-10 bg-accent/20" />
+              <div className="w-[44px] h-[72px]">
+                <Model
+                  data={muscleData}
+                  style={{ width: '100%', height: '100%' }}
+                  highlightedColors={['#EA580C', '#FB923C']}
+                  bodyColor="#D9CDBF"
+                  type="posterior"
+                  onClick={() => {}}
+                />
+              </div>
+            </>
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-3xl opacity-60">
+            <div className="w-16 h-16 flex items-center justify-center text-3xl opacity-60">
               💪
             </div>
           )}
