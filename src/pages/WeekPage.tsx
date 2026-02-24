@@ -5,7 +5,6 @@ import { supabase } from '../lib/supabase'
 import { MuscleGroupIcon, muscleFromName } from '../components/MuscleGroupIcon'
 
 const DAY_NAMES = ['', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-const DAY_FULL = ['', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
 interface WorkoutDay {
   id: string
@@ -120,7 +119,7 @@ export function WeekPage() {
         .order('day_of_week')
         .order('order_index', { referencedTable: 'template_exercises' })
         .then(({ data }) => {
-          setTemplates((data ?? []) as WorkoutDay[])
+          setTemplates((data ?? []) as unknown as WorkoutDay[])
           setLoading(false)
         })
     })
@@ -128,8 +127,6 @@ export function WeekPage() {
 
   const todayJs = new Date().getDay()
   const today = todayJs === 0 ? 7 : todayJs
-
-  const workoutDayNums = new Set(templates.map((t) => t.day_of_week))
 
   const weekTitle = new Date().toLocaleDateString('en-US', {
     month: 'long',

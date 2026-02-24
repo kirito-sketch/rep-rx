@@ -2,6 +2,7 @@
  * Clean SVG muscle group illustrations — replaces emoji fallbacks.
  * Each icon is a minimal silhouette with the primary muscle highlighted.
  */
+import type { ReactElement } from 'react'
 
 type MuscleGroup =
   | 'chest'
@@ -276,7 +277,7 @@ function ObliqueSVG({ accent, base }: { accent: string; base: string }) {
   )
 }
 
-const ICON_MAP: Record<string, (props: { accent: string; base: string }) => JSX.Element> = {
+const ICON_MAP: Record<string, (props: { accent: string; base: string }) => ReactElement> = {
   chest: ChestSVG,
   back: BackSVG,
   'back-deltoids': BackSVG,

@@ -1,9 +1,10 @@
+import type { ReactElement } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 interface NavItem {
   label: string
   path: string
-  icon: (active: boolean) => JSX.Element
+  icon: (active: boolean) => ReactElement
 }
 
 function HomeIcon({ active }: { active: boolean }) {

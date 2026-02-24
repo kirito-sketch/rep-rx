@@ -121,7 +121,7 @@ export function HistoryPage() {
         .order('started_at', { ascending: false })
         .limit(30)
         .then(({ data }) => {
-          setSessions((data ?? []) as Session[])
+          setSessions((data ?? []) as unknown as Session[])
           setLoading(false)
         })
     })
