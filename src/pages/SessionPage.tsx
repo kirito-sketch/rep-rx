@@ -88,10 +88,10 @@ export function SessionPage() {
   }
 
   return (
-    <div className="h-screen bg-bg-base flex flex-col overflow-hidden">
+    <div className="h-[100dvh] bg-bg-base flex flex-col overflow-hidden">
 
       {/* Header */}
-      <header className="flex-none flex items-center justify-between px-5 pt-12 pb-3 border-b border-border bg-bg-base">
+      <header className="flex-none flex items-center justify-between px-5 pt-12 pb-2.5 border-b border-border bg-bg-base">
         <button
           onClick={() => navigate('/')}
           className="flex items-center gap-1.5 text-text-secondary text-sm font-semibold"
@@ -112,7 +112,7 @@ export function SessionPage() {
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -20 }}
           transition={{ duration: 0.22 }}
-          className="flex-none px-5 pt-4 pb-3"
+          className="flex-none px-5 pt-3 pb-2"
         >
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1 min-w-0">
@@ -142,8 +142,8 @@ export function SessionPage() {
         </motion.div>
       </AnimatePresence>
 
-      {/* Media hero — always visible, never scrolls away */}
-      <div className="flex-none px-5 pb-4">
+      {/* Muscle diagram */}
+      <div className="flex-none px-5 pb-3">
         <ExerciseMediaCard
           key={`media-${currentExerciseIndex}`}
           exerciseName={currentExercise?.exercises?.name ?? ''}
@@ -153,8 +153,8 @@ export function SessionPage() {
         />
       </div>
 
-      {/* Set logger — scrollable */}
-      <div className="flex-1 overflow-y-auto px-5 pb-40 flex flex-col gap-4">
+      {/* Set logger */}
+      <div className="flex-1 overflow-y-auto px-5 pb-4 flex flex-col gap-3">
         {allSetsLogged ? (
           <motion.button
             key="next"

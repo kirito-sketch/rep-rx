@@ -20,26 +20,29 @@ interface StepperProps {
   onChange: (v: number) => void
 }
 
+/**
+ * Value sits ABOVE the −/+ buttons so buttons can be flex-1 width.
+ * This eliminates the horizontal overflow bug where a fixed-width button
+ * + large inline number + fixed-width button exceeded the column width.
+ */
 function Stepper({ label, unit, value, step, min, onChange }: StepperProps) {
   return (
-    <div className="flex-1 flex flex-col items-center gap-1.5">
-      <p className="text-text-muted text-[11px] font-bold uppercase tracking-wider">{label}</p>
-      <div className="flex items-center gap-2 w-full">
+    <div className="flex-1 flex flex-col items-center gap-2">
+      <p className="text-text-muted text-[10px] font-bold uppercase tracking-widest">{label}</p>
+      <p className="tabular text-[32px] leading-none font-extrabold text-text-primary">
+        {value % 1 === 0 ? value : value.toFixed(1)}
+        <span className="text-text-muted text-xs font-medium ml-0.5">{unit}</span>
+      </p>
+      <div className="flex gap-2 w-full">
         <button
           onPointerDown={() => onChange(Math.max(min, value - step))}
-          className="flex-none w-12 h-12 bg-bg-elevated border border-border rounded-xl text-text-primary text-xl font-light flex items-center justify-center active:bg-bg-base transition-colors select-none"
+          className="flex-1 h-11 bg-bg-elevated border border-border rounded-xl text-text-secondary text-xl flex items-center justify-center active:bg-bg-base transition-colors select-none"
         >
           −
         </button>
-        <div className="flex-1 text-center">
-          <span className="tabular text-3xl font-extrabold text-text-primary select-none">
-            {value % 1 === 0 ? value : value.toFixed(1)}
-          </span>
-          <span className="text-text-muted text-xs font-medium ml-1">{unit}</span>
-        </div>
         <button
           onPointerDown={() => onChange(value + step)}
-          className="flex-none w-12 h-12 bg-bg-elevated border border-border rounded-xl text-text-primary text-xl font-light flex items-center justify-center active:bg-bg-base transition-colors select-none"
+          className="flex-1 h-11 bg-bg-elevated border border-border rounded-xl text-text-secondary text-xl flex items-center justify-center active:bg-bg-base transition-colors select-none"
         >
           +
         </button>
@@ -69,42 +72,54 @@ export function SetLogger({
   }, [exerciseId, currentSet, weight, reps, restSeconds, logSet, startRest])
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-3">
+
       {/* Set progress */}
-      <div className="bg-white rounded-xl shadow-card px-4 py-3">
+      <div className="bg-white rounded-2xl shadow-card px-4 py-3">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-text-secondary text-xs font-bold">Sets</span>
-          <span className="tabular text-text-muted text-xs">
-            {currentSet} of {targetSets}
+          <span className="text-text-primary text-sm font-bold">
+            Set {currentSet}
+            <span className="text-text-muted font-normal"> of {targetSets}</span>
+          </span>
+          <span className="text-text-muted text-xs tabular">
+            Target <span className="font-semibold text-text-secondary">{targetRepsMin}–{targetRepsMax}</span> reps
           </span>
         </div>
         <div className="flex gap-1.5">
           {Array.from({ length: targetSets }).map((_, i) => (
             <div
               key={i}
-              className={`h-2 flex-1 rounded-full transition-colors ${
+              className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${
                 i < currentSet - 1
                   ? 'bg-accent'
                   : i === currentSet - 1
-                  ? 'bg-accent/30'
+                  ? 'bg-accent/35'
                   : 'bg-bg-elevated'
               }`}
             />
           ))}
         </div>
-        <p className="text-text-muted text-xs mt-2 text-center">
-          Target{' '}
-          <span className="text-text-secondary font-semibold tabular">
-            {targetRepsMin}–{targetRepsMax} reps
-          </span>
-        </p>
       </div>
 
-      {/* Steppers */}
-      <div className="bg-white rounded-xl shadow-card px-4 py-5 flex gap-4">
-        <Stepper label="Weight" unit="kg" value={weight} step={2.5} min={0} onChange={setWeight} />
-        <div className="w-px bg-border" />
-        <Stepper label="Reps" unit="reps" value={reps} step={1} min={1} onChange={setReps} />
+      {/* Weight + Reps */}
+      <div className="bg-white rounded-2xl shadow-card px-4 py-4 flex gap-4">
+        <Stepper
+          label="Weight"
+          unit="kg"
+          value={weight}
+          step={2.5}
+          min={0}
+          onChange={setWeight}
+        />
+        <div className="w-px bg-border self-stretch" />
+        <Stepper
+          label="Reps"
+          unit="reps"
+          value={reps}
+          step={1}
+          min={1}
+          onChange={setReps}
+        />
       </div>
 
       {/* Log Set */}
@@ -112,9 +127,9 @@ export function SetLogger({
         onPointerDown={handleLog}
         animate={flash ? { scale: [1, 1.04, 1] } : {}}
         transition={{ duration: 0.15, ease: [0.34, 1.56, 0.64, 1] }}
-        className="w-full bg-accent text-white font-extrabold rounded-xl py-5 text-base tracking-wide active:opacity-80 transition-opacity select-none shadow-lift"
+        className="w-full bg-accent text-white font-extrabold rounded-2xl py-4 text-base tracking-wide active:opacity-80 transition-opacity select-none shadow-lift"
       >
-        Log Set
+        Log Set {currentSet}
       </motion.button>
     </div>
   )

@@ -10,11 +10,13 @@ export const MUSCLE_MAP: Record<string, Muscle> = {
   // Chest
   chest: 'chest', 'upper chest': 'chest', pectorals: 'chest',
   'pectoralis major': 'chest', 'pectoralis minor': 'chest', 'serratus anterior': 'chest',
-  // Back
-  lats: 'back-deltoids', latissimus: 'back-deltoids', 'latissimus dorsi': 'back-deltoids',
-  'upper back': 'upper-back', 'lower back': 'lower-back', 'erector spinae': 'lower-back',
-  rhomboids: 'upper-back', 'rear deltoid': 'back-deltoids', 'posterior deltoid': 'back-deltoids',
-  infraspinatus: 'back-deltoids', 'teres major': 'back-deltoids', 'teres minor': 'back-deltoids',
+  // Back — lats/upper back → upper-back (latissimus dorsi region in the SVG body)
+  lats: 'upper-back', latissimus: 'upper-back', 'latissimus dorsi': 'upper-back',
+  'upper back': 'upper-back', rhomboids: 'upper-back', 'teres major': 'upper-back',
+  'lower back': 'lower-back', 'erector spinae': 'lower-back',
+  // Rear deltoids are back-deltoids (small posterior shoulder cap, NOT the lats)
+  'rear deltoid': 'back-deltoids', 'posterior deltoid': 'back-deltoids',
+  infraspinatus: 'back-deltoids', 'teres minor': 'back-deltoids',
   'levator scapulae': 'trapezius',
   // Shoulders
   shoulders: 'front-deltoids', delts: 'front-deltoids', deltoids: 'front-deltoids',
@@ -43,7 +45,10 @@ export const MUSCLE_MAP: Record<string, Muscle> = {
 
 const NAME_MUSCLE_PATTERNS: Array<[RegExp, Muscle]> = [
   [/press|fly|flye|flys|push.?up|dip|pec|cross.?over|cable.?cross/i, 'chest'],
-  [/row|pull.?down|pull.?up|chin.?up|lat\b|lat\s|pullover/i, 'back-deltoids'],
+  // rows / pulldowns / pull-ups all target lats → upper-back
+  [/row|pull.?down|pull.?up|chin.?up|lat\b|lat\s|pullover/i, 'upper-back'],
+  // face pull and reverse fly specifically target rear deltoids
+  [/face.?pull|reverse.?fly|rear.?delt/i, 'back-deltoids'],
   [/deadlift|back.?ext|hyper|erect|good.?morning/i, 'lower-back'],
   [/squat|leg.?press|lunge|step.?up|leg.?ext|hack/i, 'quadriceps'],
   [/leg.?curl|hamstring|rdl|romanian|nordic/i, 'hamstring'],
@@ -52,7 +57,7 @@ const NAME_MUSCLE_PATTERNS: Array<[RegExp, Muscle]> = [
   [/curl|bicep|hammer|preacher/i, 'biceps'],
   [/tricep|skull.?crush|push.?down|overhead.?ext|dips/i, 'triceps'],
   [/shoulder|lateral.?raise|front.?raise|overhead|military|arnold/i, 'front-deltoids'],
-  [/shrug|trap|upright.?row|face.?pull/i, 'trapezius'],
+  [/shrug|trap|upright.?row/i, 'trapezius'],
   [/crunch|sit.?up|plank|ab\b|core|leg.?raise|hollow/i, 'abs'],
   [/oblique|twist|woodchop|side.?bend/i, 'obliques'],
   [/forearm|wrist|grip/i, 'forearm'],
