@@ -42,20 +42,22 @@ export const MUSCLE_MAP: Record<string, Muscle> = {
 }
 
 const NAME_MUSCLE_PATTERNS: Array<[RegExp, Muscle]> = [
-  [/press|fly|flye|push.?up|dip|pec/i, 'chest'],
-  [/row|pull.?down|pull.?up|chin.?up|lat/i, 'back-deltoids'],
-  [/deadlift|back.?ext|hyper|erect/i, 'lower-back'],
-  [/squat|leg.?press|lunge|step.?up|leg.?ext/i, 'quadriceps'],
-  [/leg.?curl|hamstring|rdl|romanian/i, 'hamstring'],
-  [/hip.?thrust|glute|donkey/i, 'gluteal'],
-  [/calf.raise|calf|gastro/i, 'calves'],
-  [/curl|bicep|hammer/i, 'biceps'],
-  [/tricep|skull.?crush|push.?down/i, 'triceps'],
-  [/shoulder|lateral.raise|overhead/i, 'front-deltoids'],
-  [/shrug|trap/i, 'trapezius'],
-  [/crunch|sit.?up|plank|core/i, 'abs'],
-  [/oblique|twist/i, 'obliques'],
-  [/forearm|wrist/i, 'forearm'],
+  [/press|fly|flye|flys|push.?up|dip|pec|cross.?over|cable.?cross/i, 'chest'],
+  [/row|pull.?down|pull.?up|chin.?up|lat\b|lat\s|pullover/i, 'back-deltoids'],
+  [/deadlift|back.?ext|hyper|erect|good.?morning/i, 'lower-back'],
+  [/squat|leg.?press|lunge|step.?up|leg.?ext|hack/i, 'quadriceps'],
+  [/leg.?curl|hamstring|rdl|romanian|nordic/i, 'hamstring'],
+  [/hip.?thrust|glute|donkey|kickback/i, 'gluteal'],
+  [/calf.?raise|calf|gastro|soleus/i, 'calves'],
+  [/curl|bicep|hammer|preacher/i, 'biceps'],
+  [/tricep|skull.?crush|push.?down|overhead.?ext|dips/i, 'triceps'],
+  [/shoulder|lateral.?raise|front.?raise|overhead|military|arnold/i, 'front-deltoids'],
+  [/shrug|trap|upright.?row|face.?pull/i, 'trapezius'],
+  [/crunch|sit.?up|plank|ab\b|core|leg.?raise|hollow/i, 'abs'],
+  [/oblique|twist|woodchop|side.?bend/i, 'obliques'],
+  [/forearm|wrist|grip/i, 'forearm'],
+  [/hip.?abduct|abductor|clamshell/i, 'abductors'],
+  [/hip.?adduct|adductor|inner.?thigh/i, 'adductor'],
 ]
 
 export function mapMuscle(name: string): Muscle | null {
