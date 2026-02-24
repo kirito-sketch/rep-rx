@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { supabase } from '../lib/supabase'
-import { MuscleGroupIcon, muscleFromName } from '../components/MuscleGroupIcon'
+import Model, { type IExerciseData, type Muscle } from 'react-body-highlighter'
+import { mapMuscle, muscleFromExerciseName, uniqueMuscles } from '../lib/muscles'
 
 const DAY_NAMES = ['', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
@@ -24,29 +25,47 @@ interface WorkoutDay {
 function WorkoutDayCard({ day, isToday }: { day: WorkoutDay; isToday: boolean }) {
   const navigate = useNavigate()
   const exercises = day.template_exercises
-  const firstEx = exercises[0]
-  const muscle =
-    firstEx?.exercises?.muscle_group_primary
-      ? firstEx.exercises.muscle_group_primary.toLowerCase()
-      : muscleFromName(firstEx?.exercises?.name ?? firstEx?.exercise_id ?? '')
+
+  // Aggregate all muscles for the day
+  const allMuscles: Muscle[] = uniqueMuscles(
+    exercises.map((te) => {
+      const name = te.exercises?.muscle_group_primary ?? ''
+      const exName = te.exercises?.name ?? te.exercise_id
+      return (mapMuscle(name) ?? muscleFromExerciseName(exName)) as Muscle | null
+    })
+  )
+  const muscleData: IExerciseData[] =
+    allMuscles.length > 0 ? [{ name: day.label, muscles: allMuscles }] : []
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25 }}
-      className={`bg-white rounded-xl shadow-card overflow-hidden ${
-        isToday ? 'ring-2 ring-accent' : ''
-      }`}
+      className={`bg-white rounded-xl shadow-card overflow-hidden ${isToday ? 'ring-2 ring-accent' : ''}`}
     >
       <div className={`flex items-center justify-between px-4 py-3 ${isToday ? 'bg-accent-dim' : 'bg-bg-elevated'}`}>
-        <div>
+        <div className="flex-1 min-w-0 pr-2">
           <p className={`text-[10px] font-bold uppercase tracking-widest ${isToday ? 'text-accent' : 'text-text-muted'}`}>
             {DAY_NAMES[day.day_of_week]}{isToday ? ' · Today' : ''}
           </p>
           <h3 className="text-text-primary font-bold text-base">{day.label}</h3>
         </div>
-        <MuscleGroupIcon muscle={muscle as any} size={52} accent="#EA580C" baseColor="#E3DDD4" />
+
+        {/* Body diagram thumbnail */}
+        <div className="flex-none w-[60px] h-[60px]">
+          {muscleData.length > 0 ? (
+            <Model
+              data={muscleData}
+              style={{ width: '100%', height: '100%' }}
+              highlightedColors={['#EA580C', '#FB923C']}
+              bodyColor="#D9CDBF"
+              onClick={() => {}}
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-2xl opacity-50">💪</div>
+          )}
+        </div>
       </div>
 
       <div className="px-4 pb-3 pt-1 divide-y divide-border-subtle">

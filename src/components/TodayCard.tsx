@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { MuscleGroupIcon, muscleFromName } from './MuscleGroupIcon'
+import Model, { type IExerciseData, type Muscle } from 'react-body-highlighter'
+import { mapMuscle, muscleFromExerciseName, uniqueMuscles } from '../lib/muscles'
 
 interface TemplateExercise {
   id: string
@@ -22,13 +23,17 @@ export function TodayCard({ template }: { template: Template }) {
   const exercises = template.template_exercises ?? []
   const exerciseCount = exercises.length
 
-  // Pick the first exercise's muscle for the card illustration
-  const firstExercise = exercises[0]
-  const primaryMuscle =
-    (firstExercise?.exercises?.muscle_group_primary
-      ? firstExercise.exercises.muscle_group_primary.toLowerCase()
-      : null) ??
-    muscleFromName(firstExercise?.exercises?.name ?? firstExercise?.exercise_id ?? '')
+  // Aggregate all primary muscles across the workout
+  const allMuscles: Muscle[] = uniqueMuscles(
+    exercises.map((te) => {
+      const name = te.exercises?.muscle_group_primary ?? ''
+      const exName = te.exercises?.name ?? te.exercise_id
+      return (mapMuscle(name) ?? muscleFromExerciseName(exName)) as Muscle | null
+    })
+  )
+
+  const muscleData: IExerciseData[] =
+    allMuscles.length > 0 ? [{ name: template.label, muscles: allMuscles }] : []
 
   return (
     <motion.div
@@ -37,31 +42,40 @@ export function TodayCard({ template }: { template: Template }) {
       transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
       className="bg-white rounded-xl shadow-card overflow-hidden"
     >
-      {/* Card top: illustration strip */}
-      <div className="relative bg-accent-dim flex items-center justify-between px-5 py-4">
-        <div>
+      {/* Header strip with body diagram */}
+      <div className="relative bg-accent-dim px-5 pt-4 pb-3 flex items-center justify-between overflow-hidden">
+        <div className="flex-1 min-w-0 pr-2">
           <p className="text-accent text-[11px] font-bold uppercase tracking-widest mb-0.5">
             Today's Workout
           </p>
-          <h2 className="text-text-primary font-extrabold text-xl leading-tight">
+          <h2 className="text-text-primary font-extrabold text-xl leading-tight truncate">
             {template.label}
           </h2>
           <p className="text-text-secondary text-xs mt-0.5 font-medium">
             {exerciseCount} exercises
           </p>
         </div>
-        <div className="opacity-80">
-          <MuscleGroupIcon
-            muscle={primaryMuscle as any}
-            size={72}
-            accent="#EA580C"
-            baseColor="#E3DDD4"
-          />
+
+        {/* Body diagram — shows all muscles targeted today */}
+        <div className="flex-none w-[80px] h-[80px]">
+          {muscleData.length > 0 ? (
+            <Model
+              data={muscleData}
+              style={{ width: '100%', height: '100%' }}
+              highlightedColors={['#EA580C', '#FB923C']}
+              bodyColor="#D9CDBF"
+              onClick={() => {}}
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-3xl opacity-60">
+              💪
+            </div>
+          )}
         </div>
       </div>
 
       {/* Exercise list */}
-      <div className="px-5 pt-3 pb-4">
+      <div className="px-5 pt-2 pb-4">
         <div className="divide-y divide-border-subtle">
           {exercises.slice(0, 4).map((te) => (
             <div key={te.id} className="flex items-center justify-between py-2.5">
@@ -76,7 +90,7 @@ export function TodayCard({ template }: { template: Template }) {
         </div>
 
         {exerciseCount > 4 && (
-          <p className="text-text-muted text-xs mt-1 mb-2">
+          <p className="text-text-muted text-xs mt-1 mb-1">
             +{exerciseCount - 4} more exercises
           </p>
         )}

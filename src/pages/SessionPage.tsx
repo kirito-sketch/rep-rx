@@ -56,10 +56,7 @@ export function SessionPage() {
           .select()
           .single()
           .then(({ data }) => {
-            if (data) {
-              _setSessionId(data.id)
-              setSessionId(data.id)
-            }
+            if (data) { _setSessionId(data.id); setSessionId(data.id) }
           })
       })
     }
@@ -86,79 +83,73 @@ export function SessionPage() {
   }
 
   if (done && sessionId) {
-    return (
-      <SessionWrap
-        sessionId={sessionId}
-        setLogs={setLogs}
-        startedAt={startedAt.current}
-      />
-    )
+    return <SessionWrap sessionId={sessionId} setLogs={setLogs} startedAt={startedAt.current} />
   }
 
   return (
-    <div className="min-h-screen bg-bg-base flex flex-col">
+    <div className="h-screen bg-bg-base flex flex-col overflow-hidden">
+
       {/* Header */}
-      <header className="flex items-center justify-between px-5 pt-12 pb-3 flex-shrink-0 bg-bg-base border-b border-border">
+      <header className="flex-none flex items-center justify-between px-5 pt-12 pb-3 border-b border-border bg-bg-base">
         <button
           onClick={() => navigate('/')}
           className="flex items-center gap-1.5 text-text-secondary text-sm font-semibold"
         >
-          <span className="text-base">←</span>
-          <span>Exit</span>
+          <span>←</span><span>Exit</span>
         </button>
-
-        <div className="text-center">
-          <p className="text-text-primary text-sm font-bold truncate max-w-[140px]">
-            {template.label}
-          </p>
-        </div>
-
+        <p className="text-text-primary text-sm font-bold truncate max-w-[150px]">{template.label}</p>
         <p className="text-text-muted text-sm tabular font-medium">
           {currentExerciseIndex + 1}/{exercises.length}
         </p>
       </header>
 
-      <main className="flex-1 flex flex-col px-5 gap-4 overflow-y-auto pb-48 pt-4">
-        {/* Exercise name */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentExerciseIndex}
-            initial={{ opacity: 0, x: 16 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -16 }}
-            transition={{ duration: 0.2 }}
-          >
-            <h2 className="text-text-primary font-extrabold text-xl leading-tight">
-              {currentExercise?.exercises?.name ?? currentExercise?.exercise_id}
-            </h2>
-            {currentExercise?.exercises?.muscle_group_primary && (
-              <p className="text-text-muted text-xs mt-0.5 font-medium capitalize">
-                {currentExercise.exercises.muscle_group_primary}
-              </p>
-            )}
-          </motion.div>
-        </AnimatePresence>
-
-        {/* Media card */}
-        <ExerciseMediaCard
+      {/* Exercise identity — slides on change */}
+      <AnimatePresence mode="wait">
+        <motion.div
           key={currentExerciseIndex}
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -20 }}
+          transition={{ duration: 0.22 }}
+          className="flex-none px-5 pt-4 pb-3"
+        >
+          <h2 className="text-text-primary font-extrabold text-xl leading-tight">
+            {currentExercise?.exercises?.name ?? currentExercise?.exercise_id}
+          </h2>
+          {currentExercise?.exercises?.muscle_group_primary && (
+            <p className="text-text-muted text-xs mt-0.5 font-medium capitalize">
+              {currentExercise.exercises.muscle_group_primary}
+            </p>
+          )}
+        </motion.div>
+      </AnimatePresence>
+
+      {/* Media hero — always visible, never scrolls away */}
+      <div className="flex-none px-5 pb-4">
+        <ExerciseMediaCard
+          key={`media-${currentExerciseIndex}`}
           exerciseName={currentExercise?.exercises?.name ?? ''}
           gifUrl={currentExercise?.exercises?.gif_url ?? null}
           primaryMuscle={currentExercise?.exercises?.muscle_group_primary ?? null}
           secondaryMuscles={currentExercise?.exercises?.muscle_group_secondary ?? []}
-          isNewExercise={true}
         />
+      </div>
 
-        {/* Logger or next */}
+      {/* Set logger — scrollable */}
+      <div className="flex-1 overflow-y-auto px-5 pb-40 flex flex-col gap-4">
         {allSetsLogged ? (
-          <button
+          <motion.button
+            key="next"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
             onClick={handleNext}
             className="w-full bg-accent text-white font-extrabold rounded-xl py-5 text-base tracking-wide active:opacity-80 transition-opacity shadow-lift"
           >
             {isLastExercise ? 'Finish Session →' : 'Next Exercise →'}
-          </button>
+          </motion.button>
         ) : (
           <SetLogger
+            key={`logger-${currentExerciseIndex}`}
             exerciseId={currentExercise?.exercise_id ?? ''}
             targetSets={currentExercise?.target_sets ?? 3}
             targetRepsMin={currentExercise?.target_reps_min ?? 8}
@@ -167,7 +158,7 @@ export function SessionPage() {
             restSeconds={currentExercise?.rest_seconds ?? 90}
           />
         )}
-      </main>
+      </div>
 
       <RestTimer />
     </div>
